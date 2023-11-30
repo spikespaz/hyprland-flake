@@ -63,6 +63,12 @@
       packages = eachSystem (system:
         hyprland.packages.${system} // hyprland-xdph.packages.${system} // {
           default = hyprland.packages.${system}.hyprland;
+          inherit (import nixpkgs {
+            localSystem.system = system;
+            overlays =
+              [ self.overlays.default self.overlays.hyprland-illegal-patch ];
+          })
+            hyprland-illegal-patch;
         });
 
       # The most important overlys are re-exported from this flake.
@@ -74,6 +80,7 @@
           hyprland-packages hyprland-extras wlroots-hyprland;
         inherit (hyprland-xdph.overlays)
           xdg-desktop-portal-hyprland hyprland-share-picker;
+        hyprland-illegal-patch = import ./overlays/hyprland-illegal-patch.nix;
       } // {
         default = lib.bird.mkJoinedOverlays
           (with self.overlays; [ hyprland-packages hyprland-extras ]);
