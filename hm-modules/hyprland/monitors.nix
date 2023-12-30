@@ -42,10 +42,24 @@ in {
       type = types.attrsOf (types.submodule ({ config, ... }: {
         options = {
           name = lib.mkOption {
-            type = types.singleLineStr;
+            type = types.nullOr types.singleLineStr;
+            default = null;
             description = ''
               The name of the monitor as shown in the output of
               `hyprctl monitors`, for example `eDP-1` or `HDMI-A-1`.
+
+              This option is mutually exclusive with {option}`description`.
+            '';
+          };
+          description = lib.mkOption {
+            type = types.nullOr types.singleLineStr;
+            default = null;
+            description = ''
+              If your monitor "names" are non-deterministic
+              (e.g., sometimes a monitor is `DP-5`, other times `DP-6`),
+              you can specify this option instead.
+
+              This option is mutually exclusive with {option}`name`.
             '';
           };
           position = lib.mkOption {
@@ -131,51 +145,67 @@ in {
           };
         };
 
-        config = let
-          positionIsPoint =
-            (point2DType types.ints.unsigned).check config.position;
-          resolutionIsPoint =
-            (point2DType types.ints.positive).check config.resolution;
-        in {
-          size = lib.mkIf resolutionIsPoint {
-            x = config.resolution.x / config.scale;
-            y = config.resolution.y / config.scale;
+        config =
+          #
+          # assert lib.assertMsg
+          #   (config.name == null && config.description == null) ''
+          #     Neither `name` nor `description` have been set,
+          #     please specify one of these options.
+          #   '';
+          # assert lib.assertMsg
+          #   (lib.xor (config.name == null) (config.description == null)) ''
+          #     The options `name` and `description` are mutually exclusive,
+          #     please specify exactly one of them.
+          #   '';
+          let
+            positionIsPoint =
+              (point2DType types.ints.unsigned).check config.position;
+            resolutionIsPoint =
+              (point2DType types.ints.positive).check config.resolution;
+          in {
+            size = lib.mkIf resolutionIsPoint {
+              x = config.resolution.x / config.scale;
+              y = config.resolution.y / config.scale;
+            };
+
+            keywordParams = lib.concatLists [
+              # The name or description to match for this monitor profile.
+              # See the asserts above, only one will be present in configuration.
+              (lib.optional (config.name != null) config.name)
+              (lib.optional (config.description != null)
+                "desc:${config.description}")
+
+              # The resolution in `WIDTHxHEIGHT@REFRESH`, with `@REFRESH` optionally.
+              (lib.optional resolutionIsPoint
+                "${toString config.resolution.x}x${
+                  toString config.resolution.y
+                }${
+                  lib.optionalString (config.refreshRate != null)
+                  "@${toString config.refreshRate}"
+                }")
+              # The resolution verbatim if it is an enum string.
+              (lib.optional (!resolutionIsPoint) config.resolution)
+
+              # The position in `XxY` format if it is a point.
+              (lib.optional positionIsPoint
+                "${toString config.position.x}x${toString config.position.y}")
+              # The position verbatim if it is an enum string.
+              (lib.optional (!positionIsPoint) config.position)
+
+              #
+              [ (toString config.scale) ]
+              [ "bitdepth" (toString config.bitdepth) ]
+              [
+                "transform"
+                (if lib.isInt config.transform then
+                  toString config.transform
+                else
+                  toString transformEnum.${config.transform})
+              ]
+              (lib.optionals (config.mirror != null) [ "mirror" config.mirror ])
+              #
+            ];
           };
-
-          keywordParams = lib.concatLists [
-            [
-              config.name
-            ]
-
-            # The resolution in `WIDTHxHEIGHT@REFRESH`, with `@REFRESH` optionally.
-            (lib.optional resolutionIsPoint
-              "${toString config.resolution.x}x${toString config.resolution.y}${
-                lib.optionalString (config.refreshRate != null)
-                "@${toString config.refreshRate}"
-              }")
-            # The resolution verbatim if it is an enum string.
-            (lib.optional (!resolutionIsPoint) config.resolution)
-
-            # The position in `XxY` format if it is a point.
-            (lib.optional positionIsPoint
-              "${toString config.position.x}x${toString config.position.y}")
-            # The position verbatim if it is an enum string.
-            (lib.optional (!positionIsPoint) config.position)
-
-            #
-            [ (toString config.scale) ]
-            [ "bitdepth" (toString config.bitdepth) ]
-            [
-              "transform"
-              (if lib.isInt config.transform then
-                toString config.transform
-              else
-                toString transformEnum.${config.transform})
-            ]
-            (lib.optionals (config.mirror != null) [ "mirror" config.mirror ])
-            #
-          ];
-        };
       }));
 
       description = ''

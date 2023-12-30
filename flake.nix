@@ -79,9 +79,8 @@
           (with self.overlays; [ hyprland-packages hyprland-extras ]);
       };
 
-      homeManagerModules = {
+      homeManagerModules = lib.importDir' ./hm-modules null // {
         default = self.homeManagerModules.hyprland;
-        hyprland = import ./hm-module self;
       };
 
       checks = eachSystem (system:
