@@ -12,33 +12,58 @@
 
     # Official `hyprwm` flakes. Re-listed here because you can `follows`
     # this flake's inputs.
+
+    # <https://github.com/hyprwm/Hyprland/blob/main/flake.nix>
     hyprland = {
       url = "github:hyprwm/hyprland";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # <https://github.com/hyprwm/hyprwayland-scanner/blob/main/flake.nix>
+    hyprwayland-scanner = {
+      url = "github:hyprwm/hyprwayland-scanner";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # <https://github.com/hyprwm/hyprland-protocols/blob/main/flake.nix>
     hyprland-protocols = {
       url = "github:hyprwm/hyprland-protocols";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland-xdph = {
+    # <https://github.com/hyprwm/xdg-desktop-portal-hyprland/blob/main/flake.nix>
+    xdg-desktop-portal-hyprland = {
       url = "github:hyprwm/xdg-desktop-portal-hyprland";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprland-protocols.follows = "hyprland-protocols";
+      inputs.hyprlang.follows = "hyprlang";
     };
+    # <https://github.com/hyprwm/hyprlang/blob/main/flake.nix>
     hyprlang = {
       url = "github:hyprwm/hyprlang";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # <https://github.com/hyprwm/hyprcursor/blob/main/flake.nix>
+    hyprcursor = {
+      url = "github:hyprwm/hyprcursor";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.hyprlang.follows = "hyprlang";
+    };
 
     bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
   };
 
-  outputs = inputs@{ self, nixpkgs, systems, hyprland, hyprland-protocols
-    , hyprland-xdph, bird-nix-lib, ... }:
+  outputs = {
+    # prereq
+    self, nixpkgs, systems
+    # official hyprwm flakes
+    , hyprland, hyprwayland-scanner, hyprland-protocols
+    , xdg-desktop-portal-hyprland, hyprlang, hyprcursor
+    # lib extensions
+    , bird-nix-lib }:
     let
       inherit (self) lib;
       eachSystem = lib.genAttrs (import systems);
@@ -55,7 +80,7 @@
       # This is done specifically for when inputs of `hyprland-xdph`
       # and `hyprland` diverge, packages from `hyprland-xdph` are chosen.
       packages = eachSystem (system:
-        hyprland.packages.${system} // hyprland-xdph.packages.${system} // {
+        hyprland.packages.${system} // xdg-desktop-portal-hyprland.packages.${system} // {
           default = hyprland.packages.${system}.hyprland;
         });
 
@@ -66,7 +91,7 @@
       overlays = {
         inherit (hyprland.overlays)
           hyprland-packages hyprland-extras wlroots-hyprland;
-        inherit (hyprland-xdph.overlays)
+        inherit (xdg-desktop-portal-hyprland.overlays)
           xdg-desktop-portal-hyprland hyprland-share-picker;
       } // {
         default = lib.composeManyExtensions
