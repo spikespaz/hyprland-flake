@@ -6,9 +6,12 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
+    bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
     # <https://github.com/nix-systems/nix-systems>
-    systems.url = "github:nix-systems/default-linux";
+    systems = {
+      url = "github:nix-systems/default-linux";
+      flake = false;
+    };
 
     # Official `hyprwm` flakes. Re-listed here because you can `follows`
     # this flake's inputs.
@@ -52,18 +55,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprlang";
     };
-
-    bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
   };
 
   outputs = {
     # prereq
-    self, nixpkgs, systems
+    self, nixpkgs, systems, bird-nix-lib
     # official hyprwm flakes
     , hyprland, hyprwayland-scanner, hyprland-protocols
-    , xdg-desktop-portal-hyprland, hyprlang, hyprcursor
-    # lib extensions
-    , bird-nix-lib }:
+    , xdg-desktop-portal-hyprland, hyprlang, hyprcursor }:
     let
       inherit (self) lib;
       eachSystem = lib.genAttrs (import systems);
