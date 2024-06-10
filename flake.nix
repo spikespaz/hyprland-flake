@@ -98,10 +98,11 @@
           hyprlang
           hyprcursor
         ];
+        default = self.packages.hyprland;
       in eachSystem (system:
         (lib.foldl' (packages: input: packages // input.packages.${system}) { }
           fromInputs) // {
-            default = hyprland.packages.${system}.hyprland;
+            inherit default;
           });
 
       # See the comment for the `packages` output above,
