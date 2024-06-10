@@ -6,7 +6,11 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # Extensions to `nixpkgs.lib` required by the Hyprlang serializer.
+    # <https://github.com/spikespaz/bird-nix-lib>
     bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
+
     # <https://github.com/nix-systems/nix-systems>
     systems = {
       url = "github:nix-systems/default-linux";
@@ -58,9 +62,9 @@
   };
 
   outputs = {
-    # prereq
+    # Prerequisites
     self, nixpkgs, systems, bird-nix-lib
-    # official hyprwm flakes
+    # Official Hyprland flakes
     , hyprland, hyprwayland-scanner, hyprland-protocols
     , xdg-desktop-portal-hyprland, hyprlang, hyprcursor }:
     let
