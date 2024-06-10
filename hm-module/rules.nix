@@ -1,7 +1,7 @@
 self:
 args@{ config, lib, pkgs, ... }:
 let
-  inherit (self.lib) lib;
+  inherit (self) lib;
   inherit (lib) types;
 
   args' = args // { inherit lib; };

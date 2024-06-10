@@ -1,7 +1,7 @@
 self:
 { config, lib, pkgs, ... }:
 let
-  inherit (self.lib) lib;
+  inherit (self) lib;
   inherit (lib) types;
   inherit (lib.hl.types) configFile;
 

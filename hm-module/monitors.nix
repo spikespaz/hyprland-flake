@@ -1,7 +1,7 @@
 self:
 { config, ... }:
 let
-  inherit (self.lib) lib;
+  inherit (self) lib;
   inherit (lib) types;
 
   cfg = config.wayland.windowManager.hyprland.monitors;
