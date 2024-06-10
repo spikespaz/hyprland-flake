@@ -75,14 +75,35 @@
         ];
       in nixpkgs.lib.extend overlay // { inherit overlay; };
 
-      # Packages have priority from right-to-left. Packages from the rightmost
-      # attributes will replace those with the same name on the accumulated left.
-      # This is done specifically for when inputs of `hyprland-xdph`
-      # and `hyprland` diverge, packages from `hyprland-xdph` are chosen.
-      packages = eachSystem (system:
-        hyprland.packages.${system} // xdg-desktop-portal-hyprland.packages.${system} // {
-          default = hyprland.packages.${system}.hyprland;
-        });
+      # All input flake packages (those that have them) are merged into this
+      # flake's `packages` output. The merge will override derivation attributes
+      # according to the order the flake inputs are listed here.
+      #
+      # For example, two packages export `xdg-desktop-portal-hyprland`,
+      # being the flake of the same name and `hyprland`. Since the input
+      # `hyprland` is listed before `xdg-desktop-portal-hyprland`,
+      # the package from the latter flake will appear in the output here.
+      # Generally, this is the reverse-order of which overlays would be applied.
+      # This order does have meaning, but in general makes no difference
+      # as long as the inputs of each flake follow the correct channels.
+      #
+      # Ideally, we would `inherit` every single package from each input
+      # individually, but this would be very tedious to maintain.
+      # This is easier to maintain this "list of flakes which have packages".
+      packages = let
+        fromInputs = [
+          hyprland
+          hyprwayland-scanner
+          hyprland-protocols
+          xdg-desktop-portal-hyprland
+          hyprlang
+          hyprcursor
+        ];
+      in eachSystem (system:
+        (lib.foldl' (packages: input: packages // input.packages.${system}) { }
+          fromInputs) // {
+            default = hyprland.packages.${system}.hyprland;
+          });
 
       # The most important overlys are re-exported from this flake.
       # This flake's `default` overlay contains minimum required overlays.
