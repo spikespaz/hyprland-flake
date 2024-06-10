@@ -68,15 +68,13 @@
     , hyprland, hyprwayland-scanner, hyprland-protocols
     , xdg-desktop-portal-hyprland, hyprlang, hyprcursor }:
     let
-      inherit (self) lib;
+      lib = nixpkgs.lib.extend (nixpkgs.lib.composeManyExtensions [
+        bird-nix-lib.lib.overlay
+        (import ./lib)
+      ]);
       eachSystem = lib.genAttrs (import systems);
     in {
-      lib = let
-        overlay = nixpkgs.lib.composeManyExtensions [
-          bird-nix-lib.lib.overlay
-          (import ./lib)
-        ];
-      in nixpkgs.lib.extend overlay // { inherit overlay; };
+      lib = lib // { overlay = import ./lib; };
 
       # All input flake packages (those that have them) are merged into this
       # flake's `packages` output. The merge will override derivation attributes
