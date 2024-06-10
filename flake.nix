@@ -104,18 +104,30 @@
             default = hyprland.packages.${system}.hyprland;
           });
 
-      # The most important overlys are re-exported from this flake.
-      # This flake's `default` overlay contains minimum required overlays.
-      # Other overlays can be accessed through
-      # `inputs.hyprland-nix.inputs.<flake-name>.overlays.<overlay-name>`.
-      overlays = {
-        inherit (hyprland.overlays)
-          hyprland-packages hyprland-extras wlroots-hyprland;
-        inherit (xdg-desktop-portal-hyprland.overlays)
-          xdg-desktop-portal-hyprland hyprland-share-picker;
-      } // {
-        default = lib.composeManyExtensions
-          (with self.overlays; [ hyprland-packages hyprland-extras ]);
+      # See the comment for the `packages` output above,
+      # this output is merged together in the same way.
+      overlays = let
+        fromInputs = [
+          hyprland
+          hyprwayland-scanner
+          hyprland-protocols
+          xdg-desktop-portal-hyprland
+          hyprlang
+          hyprcursor
+        ];
+        # Currently this default overlay is identical to that of the `hyprland`
+        # flake. It is redefined here because the `default` overlay from other
+        # flakes are dropped.
+        #
+        # It is expected that other flakes provide a `default` overlay that is
+        # aggregate of others, in which case, it should not be re-exported
+        # for this flake, or it is an alias to a package overlay
+        # (which would already be present in this merged set).
+        default = with self.overlays;
+          lib.composeManyExtensions [ hyprland-packages hyprland-extras ];
+      in lib.foldl' (overlays: input: overlays // input.overlays) { } fromInputs
+      // {
+        inherit default;
       };
 
       homeManagerModules = {
