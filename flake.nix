@@ -38,14 +38,12 @@
   };
 
   outputs = inputs@{ self, nixpkgs, systems, hyprland, hyprland-protocols
-    , hyprland-xdph, ... }:
+    , hyprland-xdph, bird-nix-lib, ... }:
     let
-      lib' = nixpkgs.lib.pipe nixpkgs.lib [
-        (l: l.extend self.inputs.bird-nix-lib.lib.overlay)
-        (l: l.extend (import "${self}/lib"))
-      ];
-    in let
-      lib = lib';
+      lib = nixpkgs.lib.extend (nixpkgs.lib.composeManyExtensions [
+        bird-nix-lib.lib.overlay
+        (import ./lib)
+      ]);
 
       eachSystem = lib.genAttrs (import systems);
     in {
