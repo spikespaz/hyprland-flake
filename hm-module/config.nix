@@ -3,11 +3,11 @@ args@{ config, lib, pkgs, ... }:
 let
   inherit (self) lib;
   inherit (lib) types;
+  inherit (lib.hl.types) configFile;
 
   args' = args // { inherit lib; };
 
   cfg = config.wayland.windowManager.hyprland;
-  cfgPath = "config.wayland.windowManager.hyprland";
 
   defaultPackage = self.packages.${pkgs.system}.hyprland;
 
@@ -130,13 +130,29 @@ in {
           If enabled, automatically tell Hyprland to reload configuration
           after activating a new Home Manager generation.
 
-          Note, this option is different from
-          `${cfgPath}.config.misc.disable_autoreload`,
+          Note, this option is different from {option}`misc.disable_autoreload`,
           which disables Hyprland's filesystem watch.
         '';
       };
 
       ### CONFIG ###
+
+      configFile = lib.mkOption {
+        type = types.attrsOf (configFile pkgs "${config.xdg.configHome}/hypr");
+        default = { };
+        description = lib.mdDoc ''
+          Configuration files and directories to link in the Hyprland config directory.
+          This is an attribute set of file descriptions similar to
+          {option}`xdg.configFile`, except relative to {path}`$XDG_CONFIG_HOME/hypr`.
+
+          If necessary, you may set {option}`xdg.configFile."hypr".recursive = true`.
+        '';
+      };
+
+      configPackage = lib.mkOption {
+        type = types.package;
+        readOnly = true;
+      };
 
       config = lib.mkOption {
         type = configFormat.type;
@@ -269,6 +285,13 @@ in {
       home.packages = [ cfg.finalPackage ]
         ++ lib.optional cfg.xwayland.enable pkgs.xwayland;
     }
+    {
+      wayland.windowManager.hyprland.configPackage = pkgs.symlinkJoin {
+        name = "hyprland-config";
+        paths = lib.mapAttrsToList (_: file: file.source) cfg.configFile;
+      };
+    }
+    (lib.mkIf cfg.enable { xdg.configFile."hypr".source = cfg.configPackage; })
     # Can't set `hyprland.config.plugin` because the key is expected to be unique,
     # and that attribute should be used for plugin config, not loading them.
     (lib.mkIf (cfg.plugins != [ ]) {
