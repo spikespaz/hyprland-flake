@@ -1,35 +1,37 @@
 lib: _:
 let
-  defaultFormatterOptions = {
-    sortPred = _: _: false;
-    indentChars = "    ";
-    spaceAroundEquals = true;
-    lineBreakPred = prev: next:
+  toConfigString = {
+    # If a custom Nix structure is desired, the parser may be replaced.
+    astBuilder ? attrsToNodeList [ ],
+    # Given two attribute paths, return `true` if the
+    # first should precede the second.
+    sortPred ? _: _: false,
+    # String to use for indentation characters.
+    indentChars ? "    ",
+    # Given two nodes (from the AST) return `true` if a line-break
+    # should be inserted between them.
+    lineBreakPred ? prev: next:
       let
         betweenDifferent = nodeType prev != nodeType next;
         betweenRepeats = isRepeatNode prev && isRepeatNode next;
         betweenSections = isSectionNode prev && isSectionNode next;
-      in prev != null
-      && (betweenDifferent || betweenRepeats || betweenSections);
-  };
-
-  toConfigString = opts:
-    let opts' = defaultFormatterOptions // opts;
-    in attrs:
+      in prev != null && (betweenDifferent || betweenRepeats || betweenSections)
+    ,
+    # Whether the output should be formatted with spaces around
+    # the `=` character in a keyword assignment.
+    spaceAroundEquals ? true,
+    #
+    }:
+    attrs:
     lib.pipe attrs [
-      (attrsToNodeList [ ])
-      (formatNodeList opts')
-      (renderNodeList opts')
+      astBuilder
+      (sortNodeListRecursive sortPred)
+      (insertLineBreakNodesRecursive lineBreakPred)
+      (insertIndentNodesRecursive indentChars)
+      (renderNodeList { inherit indentChars spaceAroundEquals; })
     ];
 
   toPrettyM = lib.generators.toPretty { multiline = true; };
-
-  formatNodeList = opts: nodes:
-    lib.pipe nodes [
-      (sortNodeListRecursive opts.sortPred)
-      (insertLineBreakNodesRecursive opts.lineBreakPred)
-      (insertIndentNodesRecursive opts.indentChars)
-    ];
 
   renderNodeList = opts: nodes: lib.concatStrings (map (renderNode opts) nodes);
 
@@ -168,8 +170,8 @@ let
 in {
   inherit
   # Transforms
-    toConfigString attrsToNodeList formatNodeList renderNodeList
-    insertLineBreakNodesRecursive insertIndentNodesRecursive
+    toConfigString attrsToNodeList renderNodeList insertLineBreakNodesRecursive
+    insertIndentNodesRecursive
     # Checks
     nodeType isNode isNodeType isStringNode isIndentNode isVariableNode
     isRepeatNode isSectionNode
