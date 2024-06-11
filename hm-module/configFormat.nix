@@ -13,7 +13,6 @@ in {
       listOfValueTypes = listOf valueType;
     in attrsOfValueTypes;
 
-  formatOptions = formatOptions;
   lib = lib.hyprnix.hyprlang;
 
   inherit toConfigString;
