@@ -1,4 +1,4 @@
-{ lib, ... }:
+lib: _:
 let
   inherit (lib) types;
 

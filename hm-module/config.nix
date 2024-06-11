@@ -2,7 +2,7 @@
 { config, pkgs, ... }:
 let
   inherit (lib) types;
-  inherit (lib.hl.types) configFile;
+  inherit (lib.hyprnix.types) configFile;
 
   cfg = config.wayland.windowManager.hyprland;
 

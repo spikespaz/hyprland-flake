@@ -1,11 +1,6 @@
 lib: lib0:
-let
-  libAttrs = lib.pipe ./. [
-    (dir:
-      lib.importDir dir
-      (name: type: !(type == "regular" && name == "default.nix")))
-    (lib.mapAttrs (_: fn: fn { inherit lib; }))
-  ];
-in lib0 // { # #
-  hl = libAttrs;
+lib0 // {
+  hyprnix = lib0.hyprnix or { } // {
+    types = lib0.hyprnix.types or { } // import ./hyprnix/types.nix lib lib0;
+  };
 }
