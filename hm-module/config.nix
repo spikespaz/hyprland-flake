@@ -152,6 +152,7 @@ in {
           [ "dwindle" ]
           [ "master" ]
           [ "general" ]
+          [ "cursor" ]
           [ "input" ]
           [ "input" "touchpad" ]
           [ "input" "touchdevice" ]
