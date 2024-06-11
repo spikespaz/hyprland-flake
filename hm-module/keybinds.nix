@@ -1,68 +1,14 @@
 { lib, ... }:
 { config, pkgs, ... }:
 let
-  inherit (lib) types;
-
   cfg = config.wayland.windowManager.hyprland;
 
-  hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
-  configFormat = hyprlang cfg.configFormatOptions;
-
-  inherit (configFormat.lib)
-    isRepeatNode mkVariableNode mkRepeatNode insertLineBreakNodesRecursive
-    renderNodeList;
-
-  toConfigString = opts: keyBinds:
-    lib.pipe keyBinds [
-      (keyBindsToNodeList [ ])
-      (formatNodeList null)
-      (renderNodeList opts)
-    ];
-
-  breakPred = prev: next:
-    let
-      isSubmap = node: isRepeatNode prev && node.name == "submap";
-      betweenSubmaps = isSubmap prev && isSubmap next;
-      betweenRepeats = isRepeatNode prev && isRepeatNode next;
-    in prev != null && (betweenRepeats || betweenSubmaps);
-
-  formatNodeList = _: nodes:
-    lib.pipe nodes [ (insertLineBreakNodesRecursive breakPred) ];
-
-  keyBindsToNodeList = path: attrs:
-    let
-      default = lib.pipe attrs [
-        (attrs:
-          if attrs ? submap then removeAttrs attrs [ "submap" ] else attrs)
-        (bindAttrsToNodeList [ ])
-      ];
-      submaps = lib.pipe attrs [
-        (attrs: if attrs ? submap then attrs.submap else { })
-        (lib.mapAttrs (name: bindAttrsToNodeList [ "submap" ]))
-        (lib.mapAttrsToList (name: nodes:
-          let
-            nameNode = mkVariableNode [ "submap" name ] "submap" name;
-            resetNode = mkVariableNode [ "submap" name ] "submap" "reset";
-            nodes' = [ nameNode ] ++ nodes ++ [ resetNode ];
-          in mkRepeatNode [ "submap" ] "submap" nodes'))
-      ];
-    in lib.concatLists [ default submaps ];
-
-  bindAttrsToNodeList = path:
-    (lib.mapAttrsToList (bindKw: chordAttrs:
-      mkRepeatNode path bindKw (chordAttrsToNodeList path bindKw chordAttrs)));
-
-  chordAttrsToNodeList = path: bindKw: attrs:
-    lib.concatLists (lib.mapAttrsToList (chord: value:
-      if lib.isList value then
-        (map (dispatcher: mkVariableNode path bindKw "${chord}, ${dispatcher}")
-          value)
-      else
-        [ (mkVariableNode path bindKw "${chord}, ${value}") ]) attrs);
+  hyprlang = pkgs.callPackage ./keybindsFormat.nix { inherit lib; };
+  keybindsFormat = hyprlang cfg.configFormatOptions;
 in {
   options = {
     wayland.windowManager.hyprland.keyBinds = lib.mkOption {
-      type = with types; attrsOf anything;
+      type = keybindsFormat.type;
       default = { };
       description = lib.mdDoc ''
         First-level attribute name is the type of bind to use,
@@ -121,7 +67,7 @@ in {
 
   config = {
     wayland.windowManager.hyprland.configFile."keybinds.conf".text =
-      toConfigString cfg.configFormatOptions cfg.keyBinds;
+      keybindsFormat.toConfigString cfg.keyBinds;
 
     wayland.windowManager.hyprland.config.source =
       [ "${config.xdg.configHome}/hypr/keybinds.conf" ];
