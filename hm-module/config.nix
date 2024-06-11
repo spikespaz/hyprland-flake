@@ -1,7 +1,6 @@
-self:
-args@{ config, lib, pkgs, ... }:
+{ self, lib, ... }:
+args@{ config, pkgs, ... }:
 let
-  inherit (self) lib;
   inherit (lib) types;
   inherit (lib.hl.types) configFile;
 

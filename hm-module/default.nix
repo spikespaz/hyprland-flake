@@ -1,13 +1,13 @@
 self:
-{ ... }:
-let
+args@{ ... }:
+let lib = self.lib.extendLib args.lib;
 in {
   disabledModules = [
     # module in Home Manager conflicts with this one
     "services/window-managers/hyprland.nix"
   ];
 
-  imports = map (nix: import nix self) [
+  imports = map (nix: import nix { inherit self lib; }) [
     ./config.nix
     ./events.nix
     ./environment.nix

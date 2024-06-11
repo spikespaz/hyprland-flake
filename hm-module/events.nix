@@ -1,7 +1,6 @@
-self:
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
+{ config, pkgs, ... }:
 let
-  inherit (self) lib;
   inherit (lib) types;
 
   cfg = config.wayland.windowManager.hyprland.eventListener;

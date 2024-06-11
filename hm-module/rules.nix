@@ -1,7 +1,6 @@
-self:
-args@{ config, lib, pkgs, ... }:
+{ lib, ... }:
+args@{ config, pkgs, ... }:
 let
-  inherit (self) lib;
   inherit (lib) types;
 
   args' = args // { inherit lib; };
