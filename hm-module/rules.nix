@@ -2,10 +2,7 @@
 { config, pkgs, ... }:
 let
   inherit (lib) types;
-
-  hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
-  configFormat = hyprlang { };
-  inherit (configFormat.lib) valueToString;
+  inherit (lib.hyprnix.hyprlang) valueToString;
 
   cfg = config.wayland.windowManager.hyprland;
 in {
