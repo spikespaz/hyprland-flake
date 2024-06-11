@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib }:
 let
   mkPathValue = path: name: value: {
     path = path ++ [ name ];

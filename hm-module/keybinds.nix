@@ -1,16 +1,16 @@
 { lib, ... }:
-args@{ config, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   inherit (lib) types;
 
-  args' = args // { inherit lib; };
-
   cfg = config.wayland.windowManager.hyprland;
 
-  configFormat = (import ./configFormat.nix args') cfg.configFormatOptions;
+  hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
+  configFormat = hyprlang cfg.configFormatOptions;
 
   inherit (configFormat.lib)
-    mkVariableNode mkRepeatNode insertLineBreakNodesRecursive renderNodeList;
+    isRepeatNode mkVariableNode mkRepeatNode insertLineBreakNodesRecursive
+    renderNodeList;
 
   toConfigString = opts: keyBinds:
     lib.pipe keyBinds [
@@ -21,7 +21,6 @@ let
 
   breakPred = prev: next:
     let
-      inherit (configFormat.lib) nodeType isRepeatNode;
       isSubmap = node: isRepeatNode prev && node.name == "submap";
       betweenSubmaps = isSubmap prev && isSubmap next;
       betweenRepeats = isRepeatNode prev && isRepeatNode next;

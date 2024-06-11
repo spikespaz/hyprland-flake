@@ -1,9 +1,11 @@
 { lib, ... }:
-args@{ config, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   inherit (lib) types;
 
-  args' = args // { inherit lib; };
+  hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
+  configFormat = hyprlang { };
+  inherit (configFormat.lib) valueToString;
 
   cfg = config.wayland.windowManager.hyprland;
 in {
@@ -191,9 +193,6 @@ in {
         ++ (lib.optional (rule.class != null) rule.class)
         ++ (lib.optional (rule.title != null) rule.title));
     layerRuleToString = rule: "${rule.rule}, ${rule.namespace}";
-
-    configFormat = (import ./configFormat.nix args') { };
-    inherit (configFormat.lib) valueToString;
 
     compileWorkspaceRules = rules:
       lib.concatStringsSep ", " (lib.mapAttrsToList (rule: value:

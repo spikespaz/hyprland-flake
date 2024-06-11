@@ -1,16 +1,16 @@
 { self, lib, ... }:
-args@{ config, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   inherit (lib) types;
   inherit (lib.hl.types) configFile;
-
-  args' = args // { inherit lib; };
 
   cfg = config.wayland.windowManager.hyprland;
 
   defaultPackage = self.packages.${pkgs.system}.hyprland;
 
-  configFormat = (import ./configFormat.nix args') (cfg.configFormatOptions // {
+  hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
+  configRenames = import ./configRenames.nix { inherit lib; };
+  configFormat = hyprlang (cfg.configFormatOptions // {
     sortPred = pathA: pathB:
       let
         # An implimentation of order for an attribute path.
@@ -48,7 +48,6 @@ let
         ib = orderPath pathB cfg.configOrder;
       in ia < ib;
   });
-  configRenames = import ./configRenames.nix args';
 
   toConfigString = attrs:
     lib.pipe attrs [
