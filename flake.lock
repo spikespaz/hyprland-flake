@@ -178,7 +178,9 @@
     },
     "hyprlang_2": {
       "inputs": {
-        "hyprutils": "hyprutils",
+        "hyprutils": [
+          "hyprutils"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -203,20 +205,18 @@
     "hyprutils": {
       "inputs": {
         "nixpkgs": [
-          "hyprlang",
           "nixpkgs"
         ],
         "systems": [
-          "hyprlang",
           "systems"
         ]
       },
       "locked": {
-        "lastModified": 1717881334,
-        "narHash": "sha256-a0inRgJhPL6v9v7RPM/rx1kbXdfe3xJA1c9z0ZkYnh4=",
+        "lastModified": 1719593398,
+        "narHash": "sha256-OC3ciW8JmQwFyWl2v5aCNx1Qtbqzglv2nAqqX0pu0xk=",
         "owner": "hyprwm",
         "repo": "hyprutils",
-        "rev": "0693f9398ab693d89c9a0aa3b3d062dd61b7a60e",
+        "rev": "7e1b6610a21b451ca8aacf5b22c95f4139df43d6",
         "type": "github"
       },
       "original": {
@@ -312,6 +312,7 @@
         "hyprland": "hyprland",
         "hyprland-protocols": "hyprland-protocols_2",
         "hyprlang": "hyprlang_2",
+        "hyprutils": "hyprutils",
         "hyprwayland-scanner": "hyprwayland-scanner_2",
         "nixpkgs": "nixpkgs_2",
         "systems": "systems_2",

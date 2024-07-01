@@ -46,11 +46,18 @@
       inputs.hyprland-protocols.follows = "hyprland-protocols";
       inputs.hyprlang.follows = "hyprlang";
     };
+    # <https://github.com/hyprwm/hyprutils/blob/main/flake.nix>
+    hyprutils = {
+      url = "github:hyprwm/hyprutils";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # <https://github.com/hyprwm/hyprlang/blob/main/flake.nix>
     hyprlang = {
       url = "github:hyprwm/hyprlang";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.hyprutils.follows = "hyprutils";
     };
     # <https://github.com/hyprwm/hyprcursor/blob/main/flake.nix>
     hyprcursor = {
@@ -66,7 +73,7 @@
     self, nixpkgs, systems, bird-nix-lib
     # Official Hyprland flakes
     , hyprland, hyprwayland-scanner, hyprland-protocols
-    , xdg-desktop-portal-hyprland, hyprlang, hyprcursor }:
+    , xdg-desktop-portal-hyprland, hyprutils, hyprlang, hyprcursor }:
     let
       inherit (self) lib;
       extendLib = lib:
@@ -105,6 +112,7 @@
           hyprwayland-scanner
           hyprland-protocols
           xdg-desktop-portal-hyprland
+          hyprutils
           hyprlang
           hyprcursor
         ];
