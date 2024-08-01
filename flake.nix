@@ -66,6 +66,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprlang";
     };
+    # <https://github.com/hyprwm/aquamarine/blob/main/flake.nix>
+    aquamarine = {
+      url = "github:hyprwm/aquamarine";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.hyprutils.follows = "hyprutils";
+      inputs.hyprwayland-scanner.follows = "hyprwayland-scanner";
+    };
   };
 
   outputs = {
@@ -73,7 +81,8 @@
     self, nixpkgs, systems, bird-nix-lib
     # Official Hyprland flakes
     , hyprland, hyprwayland-scanner, hyprland-protocols
-    , xdg-desktop-portal-hyprland, hyprutils, hyprlang, hyprcursor }:
+    , xdg-desktop-portal-hyprland, hyprutils, hyprlang, hyprcursor, aquamarine
+    }:
     let
       inherit (self) lib;
       extendLib = lib:
@@ -115,12 +124,12 @@
           hyprutils
           hyprlang
           hyprcursor
+          aquamarine
         ];
-        default = self.packages.hyprland;
       in eachSystem (system:
         (lib.foldl' (packages: input: packages // input.packages.${system}) { }
           fromInputs) // {
-            inherit default;
+            default = self.packages.${system}.hyprland;
           });
 
       # See the comment for the `packages` output above,
@@ -133,6 +142,7 @@
           xdg-desktop-portal-hyprland
           hyprlang
           hyprcursor
+          aquamarine
         ];
         # Currently this default overlay is identical to that of the `hyprland`
         # flake. It is redefined here because the `default` overlay from other
