@@ -100,6 +100,16 @@
             (import ./lib)
           ]);
       eachSystem = lib.genAttrs (import systems);
+      hyprwmInputs = [
+        hyprland
+        hyprwayland-scanner
+        hyprland-protocols
+        xdg-desktop-portal-hyprland
+        hyprutils
+        hyprlang
+        hyprcursor
+        aquamarine
+      ];
     in {
       lib = extendLib nixpkgs.lib // {
         overlay = import ./lib;
@@ -121,35 +131,16 @@
       # Ideally, we would `inherit` every single package from each input
       # individually, but this would be very tedious to maintain.
       # This is easier to maintain this "list of flakes which have packages".
-      packages = let
-        fromInputs = [
-          hyprland
-          hyprwayland-scanner
-          hyprland-protocols
-          xdg-desktop-portal-hyprland
-          hyprutils
-          hyprlang
-          hyprcursor
-          aquamarine
-        ];
-      in eachSystem (system:
-        (lib.foldl' (packages: input: packages // input.packages.${system}) { }
-          fromInputs) // {
-            default = self.packages.${system}.hyprland;
-          });
+      packages = eachSystem (system:
+        let
+          hyprwmPackages =
+            lib.foldl' (packages: input: packages // input.packages.${system})
+            { } hyprwmInputs;
+        in hyprwmPackages // { default = self.packages.${system}.hyprland; });
 
       # See the comment for the `packages` output above,
       # this output is merged together in the same way.
       overlays = let
-        fromInputs = [
-          hyprland
-          hyprwayland-scanner
-          hyprland-protocols
-          xdg-desktop-portal-hyprland
-          hyprlang
-          hyprcursor
-          aquamarine
-        ];
         # Currently this default overlay is identical to that of the `hyprland`
         # flake. It is redefined here because the `default` overlay from other
         # flakes are dropped.
@@ -160,10 +151,10 @@
         # (which would already be present in this merged set).
         default = with self.overlays;
           lib.composeManyExtensions [ hyprland-packages hyprland-extras ];
-      in lib.foldl' (overlays: input: overlays // input.overlays) { } fromInputs
-      // {
-        inherit default;
-      };
+        hyprwmOverlays =
+          lib.foldl' (overlays: input: overlays // input.overlays) { }
+          hyprwmInputs;
+      in hyprwmOverlays // { inherit default; };
 
       homeManagerModules = {
         default = self.homeManagerModules.hyprland;
