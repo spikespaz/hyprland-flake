@@ -110,6 +110,13 @@
         hyprcursor
         aquamarine
       ];
+      hyprwmPackages = system:
+        lib.flip removeAttrs [ "default" ]
+        (lib.foldl' (packages: input: packages // input.packages.${system}) { }
+          hyprwmInputs);
+      hyprwmOverlays = lib.flip removeAttrs [ "default" ]
+        (lib.foldl' (overlays: input: overlays // input.overlays) { }
+          hyprwmInputs);
     in {
       lib = extendLib nixpkgs.lib // {
         overlay = import ./lib;
@@ -132,11 +139,9 @@
       # individually, but this would be very tedious to maintain.
       # This is easier to maintain this "list of flakes which have packages".
       packages = eachSystem (system:
-        let
-          hyprwmPackages =
-            lib.foldl' (packages: input: packages // input.packages.${system})
-            { } hyprwmInputs;
-        in hyprwmPackages // { default = self.packages.${system}.hyprland; });
+        hyprwmPackages system // {
+          default = self.packages.${system}.hyprland;
+        });
 
       # See the comment for the `packages` output above,
       # this output is merged together in the same way.
@@ -151,9 +156,6 @@
         # (which would already be present in this merged set).
         default = with self.overlays;
           lib.composeManyExtensions [ hyprland-packages hyprland-extras ];
-        hyprwmOverlays =
-          lib.foldl' (overlays: input: overlays // input.overlays) { }
-          hyprwmInputs;
       in hyprwmOverlays // { inherit default; };
 
       homeManagerModules = {
