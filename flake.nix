@@ -131,38 +131,16 @@
         inherit extendLib;
       };
 
-      # All input flake packages (those that have them) are merged into this
-      # flake's `packages` output. The merge will override derivation attributes
-      # according to the order the flake inputs are listed here.
-      #
-      # For example, two packages export `xdg-desktop-portal-hyprland`,
-      # being the flake of the same name and `hyprland`. Since the input
-      # `hyprland` is listed before `xdg-desktop-portal-hyprland`,
-      # the package from the latter flake will appear in the output here.
-      # Generally, this is the reverse-order of which overlays would be applied.
-      # This order does have meaning, but in general makes no difference
-      # as long as the inputs of each flake follow the correct channels.
-      #
-      # Ideally, we would `inherit` every single package from each input
-      # individually, but this would be very tedious to maintain.
-      # This is easier to maintain this "list of flakes which have packages".
+      # The packages here are aggregated from Hyprwm input flake's `packages` output.
+      # Cross-compiled packages are removed.
       packages = eachSystem (system:
         let
           overlayPackages = lib.mapAttrs (name: _: pkgsFor.${system}.${name})
             hyprwmPackages.${system};
         in overlayPackages // { default = self.packages.${system}.hyprland; });
 
-      # See the comment for the `packages` output above,
-      # this output is merged together in the same way.
+      # Overlays aggregated from Hyprwm flakes' `overlays` outputs.
       overlays = let
-        # Currently this default overlay is identical to that of the `hyprland`
-        # flake. It is redefined here because the `default` overlay from other
-        # flakes are dropped.
-        #
-        # It is expected that other flakes provide a `default` overlay that is
-        # aggregate of others, in which case, it should not be re-exported
-        # for this flake, or it is an alias to a package overlay
-        # (which would already be present in this merged set).
         default = with self.overlays;
           lib.composeManyExtensions [ hyprland-packages hyprland-extras ];
       in hyprwmOverlays // { inherit default; };
