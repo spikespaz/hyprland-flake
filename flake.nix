@@ -110,10 +110,11 @@
         hyprcursor
         aquamarine
       ];
-      hyprwmPackages = system:
-        lib.flip removeAttrs [ "default" ]
+      hyprwmPackages = eachSystem (system:
+        lib.filterAttrs
+        (name: _: !(name == "default" || lib.hasSuffix "-cross" name))
         (lib.foldl' (packages: input: packages // input.packages.${system}) { }
-          hyprwmInputs);
+          hyprwmInputs));
       hyprwmOverlays = lib.flip removeAttrs [ "default" ]
         (lib.foldl' (overlays: input: overlays // input.overlays) { }
           hyprwmInputs);
