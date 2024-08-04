@@ -126,6 +126,8 @@
     in {
       lib = extendLib nixpkgs.lib // {
         overlay = import ./lib;
+        # Usage:
+        # `lib = inputs.hyprnix.lib.extendLib inputs.nixpkgs.lib`
         inherit extendLib;
       };
 
