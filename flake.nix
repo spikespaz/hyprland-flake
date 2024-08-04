@@ -118,6 +118,11 @@
       hyprwmOverlays = lib.flip removeAttrs [ "default" ]
         (lib.foldl' (overlays: input: overlays // input.overlays) { }
           hyprwmInputs);
+      pkgsFor = eachSystem (system:
+        import nixpkgs {
+          localSystem.system = system;
+          overlays = lib.attrValues hyprwmOverlays;
+        });
     in {
       lib = extendLib nixpkgs.lib // {
         overlay = import ./lib;
@@ -140,9 +145,10 @@
       # individually, but this would be very tedious to maintain.
       # This is easier to maintain this "list of flakes which have packages".
       packages = eachSystem (system:
-        hyprwmPackages system // {
-          default = self.packages.${system}.hyprland;
-        });
+        let
+          overlayPackages = lib.mapAttrs (name: _: pkgsFor.${system}.${name})
+            hyprwmPackages.${system};
+        in overlayPackages // { default = self.packages.${system}.hyprland; });
 
       # See the comment for the `packages` output above,
       # this output is merged together in the same way.
