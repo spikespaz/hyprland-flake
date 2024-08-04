@@ -7,14 +7,18 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Extensions to `nixpkgs.lib` required by the Hyprlang serializer.
-    # <https://github.com/spikespaz/bird-nix-lib>
-    bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
-
     # <https://github.com/nix-systems/nix-systems>
     systems = {
       url = "github:nix-systems/default-linux";
       flake = false;
+    };
+
+    # Extensions to `nixpkgs.lib` required by the Hyprlang serializer.
+    # <https://github.com/spikespaz/bird-nix-lib>
+    bird-nix-lib = {
+      url = "github:spikespaz/bird-nix-lib";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Official `hyprwm` flakes. Re-listed here because you can `follows`
