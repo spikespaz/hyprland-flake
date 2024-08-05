@@ -9,6 +9,7 @@ in {
 
   imports = map (nix: import nix { inherit self lib; }) [
     ./config.nix
+    ./compat.nix
     ./events.nix
     ./environment.nix
     ./rules.nix # windowrulev2, layerrule, workspace
