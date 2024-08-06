@@ -6,7 +6,15 @@ let
 
   cfg = config.wayland.windowManager.hyprland;
 
-  defaultPackage = self.packages.${pkgs.system}.hyprland;
+  # The `hyprland` package in `pkgs` is probably newer if the overlay is used,
+  # otherwise, the package from this flake is guaranteed to be newer.
+  defaultPackage = let
+    inNixpkgs = pkgs.hyprland.version;
+    inFlake = self.packages.${pkgs.system}.hyprland.version;
+  in if lib.versionOlder inNixpkgs inFlake then # hyprland in nixpkgs is newer
+    pkgs.hyprland
+  else # nixpkgs has same version or older
+    self.packages.${pkgs.system}.hyprland;
 
   hyprlang = pkgs.callPackage ./configFormat.nix { inherit lib; };
   configRenames = import ./configRenames.nix { inherit lib; };
