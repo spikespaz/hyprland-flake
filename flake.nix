@@ -15,75 +15,27 @@
 
     # Extensions to `nixpkgs.lib` required by the Hyprlang serializer.
     # <https://github.com/spikespaz/bird-nix-lib>
-    bird-nix-lib = {
-      url = "github:spikespaz/bird-nix-lib";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    bird-nix-lib.url = "github:spikespaz/bird-nix-lib";
 
     # Official `hyprwm` flakes. Re-listed here because you can `follows`
     # this flake's inputs.
 
     # <https://github.com/hyprwm/Hyprland/blob/main/flake.nix>
-    hyprland = {
-      url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.aquamarine.follows = "aquamarine";
-      inputs.hyprcursor.follows = "hyprcursor";
-      inputs.hyprlang.follows = "hyprlang";
-      inputs.hyprutils.follows = "hyprutils";
-      inputs.hyprwayland-scanner.follows = "hyprwayland-scanner";
-      inputs.xdph.follows = "xdg-desktop-portal-hyprland";
-    };
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
     # <https://github.com/hyprwm/hyprwayland-scanner/blob/main/flake.nix>
-    hyprwayland-scanner = {
-      url = "github:hyprwm/hyprwayland-scanner";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    hyprwayland-scanner.url = "github:hyprwm/hyprwayland-scanner";
     # <https://github.com/hyprwm/hyprland-protocols/blob/main/flake.nix>
-    hyprland-protocols = {
-      url = "github:hyprwm/hyprland-protocols";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    hyprland-protocols.url = "github:hyprwm/hyprland-protocols";
     # <https://github.com/hyprwm/xdg-desktop-portal-hyprland/blob/master/flake.nix>
-    xdg-desktop-portal-hyprland = {
-      url = "github:hyprwm/xdg-desktop-portal-hyprland";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.hyprland-protocols.follows = "hyprland-protocols";
-      inputs.hyprlang.follows = "hyprlang";
-    };
+    xdph.url = "github:hyprwm/xdg-desktop-portal-hyprland";
     # <https://github.com/hyprwm/hyprutils/blob/main/flake.nix>
-    hyprutils = {
-      url = "github:hyprwm/hyprutils";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    hyprutils.url = "github:hyprwm/hyprutils";
     # <https://github.com/hyprwm/hyprlang/blob/main/flake.nix>
-    hyprlang = {
-      url = "github:hyprwm/hyprlang";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.hyprutils.follows = "hyprutils";
-    };
+    hyprlang.url = "github:hyprwm/hyprlang";
     # <https://github.com/hyprwm/hyprcursor/blob/main/flake.nix>
-    hyprcursor = {
-      url = "github:hyprwm/hyprcursor";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.hyprlang.follows = "hyprlang";
-    };
+    hyprcursor.url = "github:hyprwm/hyprcursor";
     # <https://github.com/hyprwm/aquamarine/blob/main/flake.nix>
-    aquamarine = {
-      url = "github:hyprwm/aquamarine";
-      inputs.systems.follows = "systems";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.hyprutils.follows = "hyprutils";
-      inputs.hyprwayland-scanner.follows = "hyprwayland-scanner";
-    };
+    aquamarine.url = "github:hyprwm/aquamarine";
   };
 
   outputs = {
@@ -91,7 +43,7 @@
     self, nixpkgs, systems, bird-nix-lib
     # Official Hyprland flakes
     , hyprland, hyprwayland-scanner, hyprland-protocols
-    , xdg-desktop-portal-hyprland, hyprutils, hyprlang, hyprcursor, aquamarine
+    , xdph, hyprutils, hyprlang, hyprcursor, aquamarine
     }:
     let
       inherit (self) lib;
@@ -108,7 +60,7 @@
         hyprland
         hyprwayland-scanner
         hyprland-protocols
-        xdg-desktop-portal-hyprland
+        xdph
         hyprutils
         hyprlang
         hyprcursor
