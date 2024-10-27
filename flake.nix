@@ -34,6 +34,7 @@
       inputs.hyprlang.follows = "hyprlang";
       inputs.hyprutils.follows = "hyprutils";
       inputs.hyprwayland-scanner.follows = "hyprwayland-scanner";
+      inputs.hyprland-protocols.follows = "hyprwayland-scanner";
       inputs.xdph.follows = "xdg-desktop-portal-hyprland";
     };
     # <https://github.com/hyprwm/hyprwayland-scanner/blob/main/flake.nix>
@@ -53,8 +54,10 @@
       url = "github:hyprwm/xdg-desktop-portal-hyprland";
       inputs.systems.follows = "systems";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.hyprland-protocols.follows = "hyprland-protocols";
       inputs.hyprlang.follows = "hyprlang";
+      inputs.hyprutils.follows = "hyprutils";
+      inputs.hyprwayland-scanner.follows = "hyprwayland-scanner";
+      inputs.hyprland-protocols.follows = "hyprland-protocols";
     };
     # <https://github.com/hyprwm/hyprutils/blob/main/flake.nix>
     hyprutils = {
