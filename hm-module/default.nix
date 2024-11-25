@@ -16,5 +16,6 @@ in {
     ./animations.nix
     ./keybinds.nix
     ./monitors.nix
+    ./devices.nix
   ];
 }
