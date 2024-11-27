@@ -85,6 +85,10 @@ in {
       original = [ "decoration" "col.shadow_inactive" ];
     }
     {
+      prefer = [ "decoration" "shadow" "inactive_color" ];
+      original = [ "decoration" "shadow" "color_inactive" ];
+    }
+    {
       prefer = [ "input" "touchpad" "tap_to_click" ];
       original = [ "input" "touchpad" "tap-to-click" ];
     }
